@@ -1,25 +1,33 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Header from './header';
+import Story from './story';
+import Form from './form';
+import firebaseConf from './config/firebase';
 
 class App extends Component {
+  state = {
+    stories: []
+  };
+  componentDidMount() {
+    var storiesRef = firebaseConf.database().ref('stories/');
+    const self = this;
+    storiesRef.on('value', function(snapshot) {
+      const snapVal = snapshot.val();
+      const stories = Object.keys(snapVal).map((key) => {
+        return snapVal[key];
+      });
+      console.log(stories);
+      self.setState({stories})
+    });
+  }
   render() {
+    const {stories} = this.state;
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        <Header/>
+        {stories.map((story) => <Story {...story}/>)}
+        <Form/>
       </div>
     );
   }
